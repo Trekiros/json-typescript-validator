@@ -58,3 +58,9 @@ const value: Mytype = {
 * This extension can only validate types that extend `object` at the top-level, because the top-level object must include a `$type` property
 * The file path is always relative to your workspace
 * If you want to use the default export of a file, the `$import` property should be equal to `"default"`
+
+### Contributing
+To test the extension in dev mode:
+* run `npm run compile`
+* press `F5` to open a new vscode window where the compiled extension will be enabled
+* use the files in `src/test` to check how the extension is working
