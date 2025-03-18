@@ -95,6 +95,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// Cleanup temporary file
 		fs.unlinkSync(tempTsFilePath);
+		fs.unlinkSync(path.join(vscode.workspace.workspaceFolders?.[0].uri.path.substring(1) || "", "temp-validation.js"))
+		fs.unlinkSync(path.join(vscode.workspace.workspaceFolders?.[0].uri.path.substring(1) || "", "temp-validation.js.map"))
 	}
 }
 

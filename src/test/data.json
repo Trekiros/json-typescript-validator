@@ -1,10 +1,6 @@
 {
     "$type": {
-<<<<<<< HEAD
-        "$from": "./src/test/model.ts",
-=======
         "$from": "./model.ts",
->>>>>>> using_file
         "$import": "MyType"
     },
     "value": 1234,
@@ -18,11 +14,5 @@
     "intersectionType": {
         "nestedVal1": 1234,
         "nestedVal2": "abcd"
-<<<<<<< HEAD
-    },
-
-    "functionType": 1234
-=======
     }
->>>>>>> using_file
 }
