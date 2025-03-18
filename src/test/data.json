@@ -1,0 +1,20 @@
+{
+    "$type": {
+        "$from": "./src/test/model.ts",
+        "$import": "MyType"
+    },
+    "value": 1234,
+    "arr": [56, 78, 90, "abcd"],
+    "enumProp": 1,
+
+    "nestedObj": {
+        "nestedVal": 1234
+    },
+
+    "intersectionType": {
+        "nestedVal1": 1234,
+        "nestedVal2": "abcd"
+    },
+
+    "functionType": 1234
+}
