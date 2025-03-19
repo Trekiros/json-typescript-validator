@@ -13,6 +13,5 @@
 
     "intersectionType": {
         "nestedVal1": 1234,
-        "nestedVal2": "abcd"
     }
 }
