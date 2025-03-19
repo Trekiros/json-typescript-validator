@@ -1,5 +1,5 @@
-import * as vscode from "vscode";
-import { wrapFile } from "./fileWrapper";
+import * as vscode from "vscode"
+import { wrapFile } from "./fileWrapper"
 
 export function initializeCompletionHandler(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -10,7 +10,7 @@ export function initializeCompletionHandler(context: vscode.ExtensionContext) {
 			// Triggering characters
             '{', '.', '"', " "
         )
-    );
+    )
 }
 
 class JsonCompletionProvider implements vscode.CompletionItemProvider {
@@ -25,7 +25,7 @@ class JsonCompletionProvider implements vscode.CompletionItemProvider {
 }
 
 async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode.Position): Promise<vscode.CompletionItem[]> {
-    const uri = vscode.Uri.file(tempTsFilePath);
+    const uri = vscode.Uri.file(tempTsFilePath)
 	const offsetPosition = new vscode.Position(position.line + 2, position.character)
 
 	// Force vscode's typescript language server to evaluate the temporary file
@@ -37,12 +37,9 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
         "vscode.executeCompletionItemProvider",
         uri,
         offsetPosition
-    );
+    )
 
-    if (!completionList) {
-        console.warn("No completions received from VS Code.");
-        return [];
-    }
+    if (!completionList) return []
 
 	const filteredResult = completionList.items.filter(item => (
 		(item.kind === vscode.CompletionItemKind.Field)
@@ -65,7 +62,7 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
 		kind: item.kind
 	}))
 
-    return mappedResult;
+    return mappedResult
 }
 
 // VSCode's TypeScript instance only starts giving accurate completion items if the file is opened in an actual tab of the workspace
@@ -83,10 +80,10 @@ async function forceTypeScriptIndexing(uri: vscode.Uri) {
 	})
 
 	// Wait until the diagnostics start giving actual results
-	const startTime = Date.now();
+	const startTime = Date.now()
 	const timeout = 2000
     while ((Date.now() - startTime < timeout) && !vscode.languages.getDiagnostics(uri).length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500))
 	}
 
 	// Close the temporary tab
