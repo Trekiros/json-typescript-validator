@@ -1,5 +1,10 @@
 {
   "name": "json-typescript-validator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Trekiros/json-typescript-validator"
+  },
+  "publisher": "Trekiros",
   "displayName": "json-typescript-validator",
   "description": "Validates JSON files against TypeScript types when a $type field is present",
   "version": "0.0.1",

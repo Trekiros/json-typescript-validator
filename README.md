@@ -1,6 +1,3 @@
-> ## WORK IN PROGRESS
-> This extension is a work in progress and is not functional at the moment.
-
 # json-typescript-validator
 
 > A VSCode extension which allows you to use typescript types to validate JSON files.
