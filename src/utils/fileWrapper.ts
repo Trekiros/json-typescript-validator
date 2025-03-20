@@ -10,9 +10,6 @@ export async function wrapFile(
     callback: (args: { program: ts.Program, tempTsFilePath: string }) => any,
     notTaggedCallback?: () => any,
 ) {
-    const start = Date.now()
-    latest = start
-
     if (document.languageId !== "json") return
 
     const text = document.getText()
@@ -38,9 +35,9 @@ export async function wrapFile(
     // it often takes longer to execute than the time between two keystrokes
     // This check verifies that we're in the latest call of this function, 
     // So if we aren't, then we stop the function before getting to the part that is slowest.
-    if (start !== latest) return;
+    const start = Date.now()
+    latest = start
     await new Promise(res => fs.writeFile(tempTsFilePath, jsonTsCode, {}, res))
-    if (start !== latest) return;
 
     // Run TypeScript compiler on the temporary file
     try {
@@ -57,6 +54,8 @@ export async function wrapFile(
 
     // Cleanup temporary file
     try {
+        if (start !== latest) return;
+
         fs.unlinkSync(tempTsFilePath)
     } catch (e) {
         // Do nothing

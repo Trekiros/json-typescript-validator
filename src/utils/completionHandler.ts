@@ -6,9 +6,6 @@ export function initializeCompletionHandler(context: vscode.ExtensionContext) {
         vscode.languages.registerCompletionItemProvider(
             { language: "json", pattern: "**/*.json" },
             new JsonCompletionProvider(),
-			
-			// Triggering characters
-            '{', '.', '"', " "
         )
     )
 }
@@ -77,6 +74,12 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
 const alreadyOpened = new Set<string>()
 async function forceTypeScriptIndexing(uri: vscode.Uri) {
 	if (alreadyOpened.has(uri.fsPath)) return;
+
+    // Check if the tab already exists
+    for (const group of vscode.window.tabGroups.all) {
+		const tab = group.tabs.find(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === uri.fsPath);
+		if (!!tab) return;
+    }
 
 	// Open document without losing focus on the current tab
 	const document = await vscode.workspace.openTextDocument(uri)
