@@ -21,8 +21,9 @@ async function validateJson(document: vscode.TextDocument) {
 
         if (!program) return;
 
-        const diagnostics = ts.getPreEmitDiagnostics(program)
-            .filter(diag => diag.code !== 5097) // Ignore the error that says you can't import typescript files
+        const sourceFile = program.getSourceFile(tempTsFilePath)
+        let diagnostics = ts.getPreEmitDiagnostics(program, sourceFile)
+            .filter(diag => (diag.code !== 5097)) // This error just says that you can't import ".ts" files so it's useless to display
 
         const jsonDiagnostics: vscode.Diagnostic[] = []
         for (const diag of diagnostics) {

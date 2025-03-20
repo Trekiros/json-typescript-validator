@@ -1,9 +1,8 @@
 {
     "$type": {
-        "$from": "./model.tsx",
+        "$from": "./model.ts",
         "$import": "MyType"
     },
-    "optionalProp": "abcd",
     "value": 1234,
     "arr": [56, 78, 90, "abcd"],
     "enumProp": 1,
