@@ -1,1 +1,0 @@
-export type GenericType<T> = { value: T }

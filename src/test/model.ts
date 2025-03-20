@@ -1,5 +1,3 @@
-import { GenericType } from "./dep"
-
 export type MyType = {
     value: number,
     
@@ -18,6 +16,4 @@ export type MyType = {
     } & {
         nestedVal2: string,
     },
-
-    newProp: GenericType<number>,
 }
