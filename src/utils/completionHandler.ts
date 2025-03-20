@@ -16,9 +16,15 @@ export function initializeCompletionHandler(context: vscode.ExtensionContext) {
 class JsonCompletionProvider implements vscode.CompletionItemProvider {
     async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.CompletionItem[]> {
 		let result: vscode.CompletionItem[] = []
-		await wrapFile(document, async ({ tempTsFilePath }) => {
-			result = await getCompletionsFromVSCode(tempTsFilePath, position)
-		})
+		await wrapFile(
+            document, 
+            async ({ tempTsFilePath }) => {
+                result = await getCompletionsFromVSCode(tempTsFilePath, position)
+            },
+            async () => {
+                result = await handleUntaggedFile(document, position)
+            },
+        )
 
 		return structuredClone(result)
     }
@@ -43,6 +49,7 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
 
 	const filteredResult = completionList.items.filter(item => (
 		(item.kind === vscode.CompletionItemKind.Field)
+     || (item.kind === vscode.CompletionItemKind.Property)
 	 || (item.kind === vscode.CompletionItemKind.Constant)
 	) && (
 		typeof item.label === "string" // This removes generic suggestions which are usually not relevant
@@ -98,4 +105,37 @@ async function forceTypeScriptIndexing(uri: vscode.Uri) {
 
 	// This only needs to be done once
 	alreadyOpened.add(uri.fsPath)
+}
+
+const activeRequests = new Set<string>()
+async function handleUntaggedFile(document: vscode.TextDocument, position: vscode.Position) {
+    // if getCompletionsFromVsCode is called on the current textdocument, since that's a JSON, then it would cause an infinite loop
+    // So this activeRequests set allows us to break out of the loop.
+    if (activeRequests.has(document.uri.fsPath)) return []
+
+    activeRequests.add(document.uri.fsPath)
+
+    try {
+        const result = await getCompletionsFromVSCode(document.uri.fsPath, position)
+    
+        // Some JSON files such as package.json follow an implicit schema
+        // For those, we don't add the $type suggestion
+        const isSpecialJSON = !result.find(item => (item.label === "$schema"))
+        if (isSpecialJSON) return result;
+
+        const item = new vscode.CompletionItem('"$type"', vscode.CompletionItemKind.Snippet)
+        item.insertText = new vscode.SnippetString(': {\n\t"$$from": "$1",\n\t"$$import": "$2"\n}$3')
+        item.sortText = "0"
+        item.preselect = true
+
+        item.command = {
+            command: "editor.action.insertSnippet",
+            title: "Insert Snippet",
+            arguments: [{ snippet: item.insertText.value }]
+        };
+
+        return [item]
+    } finally {
+        activeRequests.delete(document.uri.fsPath)
+    }
 }

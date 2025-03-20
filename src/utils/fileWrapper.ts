@@ -7,7 +7,8 @@ let latest = 0
 
 export async function wrapFile(
     document: vscode.TextDocument, 
-    callback: (args: { program: ts.Program, tempTsFilePath: string }) => any
+    callback: (args: { program: ts.Program, tempTsFilePath: string }) => any,
+    notTaggedCallback?: () => any,
 ) {
     const start = Date.now()
     latest = start
@@ -17,7 +18,10 @@ export async function wrapFile(
     const text = document.getText()
     const $type = extractTypeProp(text)
 
-    if (!$type) return
+    if (!$type) {
+        if (!!notTaggedCallback) await notTaggedCallback()
+        return;
+    }
 
     // Convert JSON to TypeScript syntax
     const jsonTsCode =

@@ -15,6 +15,8 @@ export function initializeDiagnosticsHandler(context: vscode.ExtensionContext) {
 
 
 async function validateJson(document: vscode.TextDocument) {
+    diagnosticCollection.clear()
+
     wrapFile(document, ({ program, tempTsFilePath }) => {
         const diagnostics = ts.getPreEmitDiagnostics(program)
             .filter(diag => diag.code !== 5097) // Ignore the error that says you can't import typescript files
@@ -43,7 +45,6 @@ async function validateJson(document: vscode.TextDocument) {
         }
 
         // Apply diagnostics to the JSON file
-        diagnosticCollection.clear()
         diagnosticCollection.set(document.uri, jsonDiagnostics)
     })
 }
