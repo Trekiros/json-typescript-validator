@@ -1,6 +1,6 @@
 {
     "$type": {
-        "$from": "./model.ts",
+        "$from": "./model.tsx",
         "$import": "MyType"
     },
     "optionalProp": "abcd",

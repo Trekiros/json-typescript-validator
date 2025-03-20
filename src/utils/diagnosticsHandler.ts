@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import * as ts from "typescript"
 import { wrapFile } from "./fileWrapper"
+import path from "path"
 
 let diagnosticCollection: vscode.DiagnosticCollection
 
@@ -15,7 +16,11 @@ export function initializeDiagnosticsHandler(context: vscode.ExtensionContext) {
 
 
 async function validateJson(document: vscode.TextDocument) {
-    wrapFile(document, ({ program, tempTsFilePath }) => {
+    wrapFile(document, (tempTsFilePath) => {
+        const program = createProgram(tempTsFilePath)
+
+        if (!program) return;
+
         const diagnostics = ts.getPreEmitDiagnostics(program)
             .filter(diag => diag.code !== 5097) // Ignore the error that says you can't import typescript files
 
@@ -47,4 +52,27 @@ async function validateJson(document: vscode.TextDocument) {
     }, function handleUntaggedFile() {
         diagnosticCollection.clear()
     })
+}
+
+// This creates a TypeScript program which re-uses the user's tsconfig, to ensure that things like module resolution behave in a consistent and predictable way
+function createProgram(uri: string) {
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath || './'
+    const configPath = ts.findConfigFile(workspacePath, ts.sys.fileExists, "tsconfig.json")
+    
+    if (!configPath) {
+        vscode.window.showErrorMessage("Could not find tsconfig.json in workspace.")
+        return
+    }
+
+    const configFile = ts.readConfigFile(configPath, ts.sys.readFile)
+
+    if (configFile.error) {
+        vscode.window.showErrorMessage("Error reading tsconfig.json")
+        return
+    }
+
+    const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(configPath))
+    const program = ts.createProgram([uri], parsedConfig.options)
+
+    return program
 }

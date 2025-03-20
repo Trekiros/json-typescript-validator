@@ -1,13 +1,17 @@
 import * as vscode from "vscode"
-import * as ts from "typescript"
 import * as fs from "fs"
 import * as path from "path"
 
 let latest = 0
 
+type TypeTag = {
+    $from: string,
+    $import: string,
+}
+
 export async function wrapFile(
     document: vscode.TextDocument, 
-    callback: (args: { program: ts.Program, tempTsFilePath: string }) => any,
+    callback: (tempFileUri: string) => any,
     notTaggedCallback?: () => any,
 ) {
     if (document.languageId !== "json") return
@@ -41,13 +45,7 @@ export async function wrapFile(
 
     // Run TypeScript compiler on the temporary file
     try {
-        const importedFilePath = path.join(
-            vscode.workspace.workspaceFolders?.[0].uri.path.substring(1) || "", 
-            $type.$from
-        )
-
-        const program = ts.createProgram([tempTsFilePath, importedFilePath], { noEmit: true })
-        await callback({ program, tempTsFilePath })
+        await callback(tempTsFilePath)
     } catch (e) {
         vscode.window.showErrorMessage(`Error: ${e}`)
     }
@@ -62,7 +60,7 @@ export async function wrapFile(
     }
 }
 
-function extractTypeProp(text: string) {
+function extractTypeProp(text: string): TypeTag|null {
     const match = text.match(/"\$type"\s*:\s*{\s*"\$from"\s*:\s*"([^"]+)"\s*,\s*"\$import"\s*:\s*"([^"]+)"/)
     if (!match) return null
 

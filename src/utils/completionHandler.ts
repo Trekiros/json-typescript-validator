@@ -15,7 +15,7 @@ class JsonCompletionProvider implements vscode.CompletionItemProvider {
 		let result: vscode.CompletionItem[] = []
 		await wrapFile(
             document, 
-            async ({ tempTsFilePath }) => {
+            async (tempTsFilePath) => {
                 result = await getCompletionsFromVSCode(tempTsFilePath, position)
             },
             async () => {
