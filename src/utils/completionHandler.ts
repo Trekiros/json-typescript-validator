@@ -31,9 +31,6 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
     const uri = vscode.Uri.file(tempTsFilePath)
 	const offsetPosition = new vscode.Position(position.line + 2, position.character)
 
-	// Force vscode's typescript language server to evaluate the temporary file
-	await forceTypeScriptIndexing(uri)
-
     // Ask VS Code to fetch completions
     const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
         "vscode.executeCompletionItemProvider",
@@ -77,46 +74,6 @@ async function getCompletionsFromVSCode(tempTsFilePath: string, position: vscode
     return mappedResult
 }
 
-// VSCode's TypeScript instance only starts giving accurate completion items if the file is opened in an actual tab of the workspace
-// This function ensures that is the case.
-const alreadyOpened = new Set<string>()
-async function forceTypeScriptIndexing(uri: vscode.Uri) {
-	if (alreadyOpened.has(uri.fsPath)) return;
-
-    // Check if the tab already exists
-    for (const group of vscode.window.tabGroups.all) {
-		const tab = group.tabs.find(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === uri.fsPath);
-		if (!!tab) return;
-    }
-
-	// Open document without losing focus on the current tab
-	const document = await vscode.workspace.openTextDocument(uri)
-	const editor = await vscode.window.showTextDocument(document, {
-		viewColumn: vscode.ViewColumn.Beside, // Open in a new tab beside the current one
-		preview: true, // Open as a preview (auto-closes when replaced)
-		preserveFocus: true, // Do NOT take focus away
-	})
-
-	// Wait until the diagnostics start giving actual results
-	const startTime = Date.now()
-	const timeout = 2000
-    while ((Date.now() - startTime < timeout) && !vscode.languages.getDiagnostics(uri).length) {
-        await new Promise(resolve => setTimeout(resolve, 500))
-	}
-
-	// Close the temporary tab
-	for (const group of vscode.window.tabGroups.all) {
-		const tab = group.tabs.find(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === uri.fsPath);
-		
-		if (tab) {
-			await vscode.window.tabGroups.close(tab); // Close it without switching focus
-			break;
-		}
-	}
-
-	// This only needs to be done once
-	alreadyOpened.add(uri.fsPath)
-}
 
 const activeRequests = new Set<string>()
 async function handleUntaggedFile(document: vscode.TextDocument, position: vscode.Position) {
