@@ -16,14 +16,21 @@ export function initializeDiagnosticsHandler(context: vscode.ExtensionContext) {
 
 
 async function validateJson(document: vscode.TextDocument) {
-    wrapFile(document, (tempTsFilePath) => {
-        const program = createProgram(tempTsFilePath)
+    console.log("json-typescript-validator - validating json")
 
+    wrapFile(document, (tempTsFilePath) => {
+        console.log("json-typescript-validator - file wrapped")
+
+        const program = createProgram(tempTsFilePath)
         if (!program) return;
+        
+        console.log("json-typescript-validator - typescript program created")
 
         const sourceFile = program.getSourceFile(tempTsFilePath)
         let diagnostics = ts.getPreEmitDiagnostics(program, sourceFile)
             .filter(diag => (diag.code !== 5097)) // This error just says that you can't import ".ts" files so it's useless to display
+
+        console.log(`json-typescript-validator - retrieved ${diagnostics.length} typescript diagnostics`)
 
         const jsonDiagnostics: vscode.Diagnostic[] = []
         for (const diag of diagnostics) {
@@ -44,14 +51,20 @@ async function validateJson(document: vscode.TextDocument) {
                         vscode.DiagnosticSeverity.Error
                     );
                     jsonDiagnostics.push(diagnostic)
+                    
+                    console.log(`json-typescript-validator - diagnostic saved`, diagnostic)
                 }
+            } else {
+                console.log(`json-typescript-validator - diagnostic skipped`, diag)
             }
         }
 
         // Apply diagnostics to the JSON file
         diagnosticCollection.set(document.uri, jsonDiagnostics)
+        console.log(`json-typescript-validator - diagnostics collection updated`)
     }, function handleUntaggedFile() {
         diagnosticCollection.clear()
+        console.log(`json-typescript-validator - diagnostics collection cleared`)
     })
 }
 

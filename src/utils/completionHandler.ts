@@ -129,7 +129,7 @@ async function handleUntaggedFile(document: vscode.TextDocument, position: vscod
     try {
         const result = await getCompletionsFromVSCode(document.uri.fsPath, position, document)
     
-        // Some JSON files such as package.json follow an implicit schema
+        // Some JSON files such as package.json or tsconfig.json follow an implicit schema
         // For those, we don't add the $type suggestion
         const isSpecialJSON = !result.find(item => (item.label === "$schema"))
         if (isSpecialJSON) return result;
@@ -143,7 +143,7 @@ async function handleUntaggedFile(document: vscode.TextDocument, position: vscod
             command: "editor.action.insertSnippet",
             title: "Insert Snippet",
             arguments: [{ snippet: item.insertText.value }]
-        };
+        }
 
         return [item]
     } finally {
