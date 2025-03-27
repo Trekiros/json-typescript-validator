@@ -54,14 +54,16 @@ export async function wrapFile(
         vscode.window.showErrorMessage(`Error: ${e}`)
     }
 
-    // Cleanup temporary file
-    try {
-        if (start !== latest) return;
-
-        fs.unlinkSync(tempTsFilePath)
-    } catch (e) {
-        // Do nothing
-    }
+    // Cleanup temporary file (done after a couple seconds for longer files)
+    setTimeout(() => {
+        try {
+            if (start !== latest) return;
+    
+            fs.unlinkSync(tempTsFilePath)
+        } catch (e) {
+            // Do nothing
+        }
+    }, text.length / 10)
 }
 
 function extractTypeProp(text: string): TypeTag|null {
